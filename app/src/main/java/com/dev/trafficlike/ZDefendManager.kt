@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.zimperium.api.v5.ZDefend
+import com.zimperium.api.v5.ZDefendThreat
 import com.zimperium.api.v5.ZDeviceStatus
 import com.zimperium.api.v5.ZDeviceStatusCallback
 import com.zimperium.api.v5.ZDeviceStatusRegistration
@@ -30,32 +31,14 @@ class ZDefendManager : ZDeviceStatusCallback {
 
         if (lastDeviceStatus != null) {
             for (threat in deviceStatus.activeNewThreats) {
-                threats.add(ThreatModel(
-                    threat.uuid,
-                    threat.localizedName,
-                    threat.severity.name,
-                    threat.isMitigated,
-                    threat.localizedDetails,
-                    threat.localizedResolution))
+                addThreat(threat)
             }
             for (threat in deviceStatus.mitigatedNewThreats) {
-                threats.add(ThreatModel(
-                    threat.uuid,
-                    threat.localizedName,
-                    threat.severity.name,
-                    threat.isMitigated,
-                    threat.localizedDetails,
-                    threat.localizedResolution))
+                addThreat(threat)
             }
         } else {
             for (threat in deviceStatus.allThreats) {
-                threats.add(ThreatModel(
-                    threat.uuid,
-                    threat.localizedName,
-                    threat.severity.name,
-                    threat.isMitigated,
-                    threat.localizedDetails,
-                    threat.localizedResolution))
+                addThreat(threat)
             }
         }
 
@@ -73,5 +56,15 @@ class ZDefendManager : ZDeviceStatusCallback {
 
     fun checkForUpdates() {
         ZDefend.checkForUpdates()
+    }
+
+    private fun addThreat(threat: ZDefendThreat) {
+        threats.add(ThreatModel(
+            threat.uuid,
+            threat.localizedName,
+            threat.severity.name,
+            threat.isMitigated,
+            threat.localizedDetails,
+            threat.localizedResolution))
     }
 }
