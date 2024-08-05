@@ -1,7 +1,6 @@
 package com.dev.trafficlike
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.zimperium.api.v5.ZDefend
 import com.zimperium.api.v5.ZDefendThreat
@@ -14,6 +13,10 @@ import com.zimperium.api.v5.ZLoginStatus
 class ZDefendManager : ZDeviceStatusCallback {
     val auditLogs = mutableStateListOf<String>()
     val threats = mutableStateListOf<ThreatModel>()
+
+    companion object {
+        var shared = ZDefendManager()
+    }
 
     private var lastDeviceStatus: ZDeviceStatus? = null
     private var deviceStatusRegistration: ZDeviceStatusRegistration? = null
@@ -43,15 +46,17 @@ class ZDefendManager : ZDeviceStatusCallback {
         }
 
         lastDeviceStatus = deviceStatus
-        Log.d("TechTitan", "onDeviceStatus: $logBuilder")
+        auditLogs.add("ZDefendManager - onDeviceStatus: $logBuilder")
     }
 
     fun initializeZDefendApi() {
         deviceStatusRegistration = ZDefend.addDeviceStatusCallback(this)
+        auditLogs.add("ZDefendManager - initializeZDefendApi")
     }
 
     fun deregisterZDefendApi() {
         deviceStatusRegistration?.deregister()
+        auditLogs.add("ZDefendManager - deregisterZDefendApi()")
     }
 
     fun checkForUpdates() {

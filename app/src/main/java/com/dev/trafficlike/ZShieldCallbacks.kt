@@ -1,14 +1,15 @@
 package com.dev.trafficlike
 
-import android.util.Log
 import androidx.annotation.Keep
 
 class ZShieldCallbacks {
     companion object {
+        private val zDefendManager = ZDefendManager.shared
+
         @JvmStatic
         @Keep
         fun debugCallback() {
-            Log.i("TechTitan", "debugCallback() called")
+            zDefendManager.auditLogs.add("ZShieldCallbacks - debugCallback()")
         }
     }
 }

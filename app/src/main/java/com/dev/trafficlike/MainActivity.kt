@@ -35,11 +35,11 @@ data class ThreatModel(
     val severity: String,
     val status: Boolean,
     val description: String,
-    val resolution: String,
+    val resolution: String
 )
 
 class MainActivity : ComponentActivity() {
-    private val zDefendManager : ZDefendManager = ZDefendManager()
+    private val zDefendManager : ZDefendManager = ZDefendManager.shared
     private val databaseConnectionString: String = "Server=10.10.0.27;Database=main;User Id=danial;Password=1234;"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +66,7 @@ fun AppNavigation(zDefendManager: ZDefendManager) {
     NavHost(navController, startDestination = "main") {
         composable("main") { MainScreen(navController) }
         composable("threats") { ThreatsScreen(zDefendManager, navController) }
+        composable("audit") { AuditScreen(zDefendManager, navController) }
     }
 }
 
@@ -121,7 +122,9 @@ fun NavigationGrid(navController: NavController) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            NavigationCard(text = "Audit", modifier = Modifier.weight(1f))
+            NavigationCard(text = "Audit", modifier = Modifier.weight(1f)) {
+                navController.navigate("audit")
+            }
             NavigationCard(text = "Linked", modifier = Modifier.weight(1f))
         }
     }
@@ -247,6 +250,39 @@ fun ExpandableCard(
                 Text(
                     text = threat.resolution,
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AuditScreen(zDefendManager: ZDefendManager, navController: NavController) {
+    val audits = zDefendManager.auditLogs
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Text(
+                text = "Audit",
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn {
+            items(audits) { audit ->
+                Text(
+                    text = audit,
+                    style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
