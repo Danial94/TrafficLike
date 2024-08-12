@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +50,7 @@ fun AppNavigation(zDefendManager: ZDefendManager) {
     if (zDefendManager.isLoaded.value) {
         val navController = rememberNavController()
         NavHost(navController, startDestination = "main") {
-            composable("main") { MainScreen(navController) }
+            composable("main") { MainScreen(zDefendManager, navController) }
             composable("threats") { ThreatsScreen(zDefendManager, navController) }
             composable("policies") { PolicyScreen(zDefendManager, navController) }
             composable("troubleshoot") { TroubleshootScreen(zDefendManager, navController) }
@@ -69,25 +71,30 @@ fun AppNavigation(zDefendManager: ZDefendManager) {
 }
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(zDefendManager: ZDefendManager, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Header()
+        Header(zDefendManager)
         NavigationGrid(navController)
     }
 }
 
 @Composable
-fun Header() {
-    Text(
-        text = "ZDefend",
-        style = MaterialTheme.typography.headlineMedium,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
+fun Header(zDefendManager: ZDefendManager) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { zDefendManager.checkForUpdates() }) {
+            Icon(Icons.Default.Refresh, contentDescription = "updates")
+        }
+        Text(
+            text = "ZDefend",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable

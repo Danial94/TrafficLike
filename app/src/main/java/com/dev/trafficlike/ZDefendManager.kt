@@ -12,6 +12,7 @@ import com.zimperium.api.v5.ZDefendTroubleshoot.ZLogCallback
 import com.zimperium.api.v5.ZDeviceStatus
 import com.zimperium.api.v5.ZDeviceStatusCallback
 import com.zimperium.api.v5.ZDeviceStatusRegistration
+import com.zimperium.api.v5.ZLinkedFunctionEvent
 import com.zimperium.api.v5.ZLoginStatus
 import org.json.JSONArray
 import org.json.JSONException
@@ -103,6 +104,22 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
 
     fun checkForUpdates() {
         ZDefend.checkForUpdates()
+    }
+
+    fun registerLinkedFunction() {
+
+    }
+
+    fun deregisterAllLinkedFunction() {
+
+    }
+
+    fun onLinkedFunction(event: ZLinkedFunctionEvent) {
+
+    }
+
+    fun onMitigateFunction(event: ZLinkedFunctionEvent) {
+
     }
 
     private fun addThreat(threat: ZDefendThreat) {
