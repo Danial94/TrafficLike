@@ -8,6 +8,12 @@ class ZShieldCallbacks {
 
         @JvmStatic
         @Keep
+        fun defaultCallback() {
+            zDefendManager.auditLogs.add("ZShieldCallbacks - defaultCallback()")
+        }
+
+        @JvmStatic
+        @Keep
         fun debugCallback() {
             zDefendManager.auditLogs.add("ZShieldCallbacks - debugCallback()")
         }

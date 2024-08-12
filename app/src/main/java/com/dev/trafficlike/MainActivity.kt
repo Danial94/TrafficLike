@@ -5,17 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,15 +20,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dev.trafficlike.ui.theme.TrafficLikeTheme
-
-data class ThreatModel(
-    var id: String,
-    val name: String,
-    val severity: String,
-    val status: Boolean,
-    val description: String,
-    val resolution: String
-)
 
 class MainActivity : ComponentActivity() {
     private val zDefendManager : ZDefendManager = ZDefendManager.shared
@@ -62,11 +45,26 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(zDefendManager: ZDefendManager) {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = "main") {
-        composable("main") { MainScreen(navController) }
-        composable("threats") { ThreatsScreen(zDefendManager, navController) }
-        composable("audit") { AuditScreen(zDefendManager, navController) }
+    if (zDefendManager.isLoaded.value) {
+        val navController = rememberNavController()
+        NavHost(navController, startDestination = "main") {
+            composable("main") { MainScreen(navController) }
+            composable("threats") { ThreatsScreen(zDefendManager, navController) }
+            composable("policies") { PolicyScreen(zDefendManager, navController) }
+            composable("troubleshoot") { TroubleshootScreen(zDefendManager, navController) }
+            composable("audit") { AuditScreen(zDefendManager, navController) }
+            composable("linked") { LinkedScreen(zDefendManager, navController) }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            for (audit in zDefendManager.auditLogs) {
+                Text(text = audit)
+            }
+        }
     }
 }
 
@@ -107,14 +105,18 @@ fun NavigationGrid(navController: NavController) {
             NavigationCard(text = "Threats", modifier = Modifier.weight(1f)) {
                 navController.navigate("threats")
             }
-            NavigationCard(text = "Policies", modifier = Modifier.weight(1f))
+            NavigationCard(text = "Policies", modifier = Modifier.weight(1f)) {
+                navController.navigate("policies")
+            }
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            NavigationCard(text = "Troubleshoot", modifier = Modifier.weight(1f))
+            NavigationCard(text = "Troubleshoot", modifier = Modifier.weight(1f)) {
+                navController.navigate("troubleshoot")
+            }
             NavigationCard(text = "Simulate", modifier = Modifier.weight(1f))
         }
         Row(
@@ -125,7 +127,9 @@ fun NavigationGrid(navController: NavController) {
             NavigationCard(text = "Audit", modifier = Modifier.weight(1f)) {
                 navController.navigate("audit")
             }
-            NavigationCard(text = "Linked", modifier = Modifier.weight(1f))
+            NavigationCard(text = "Linked", modifier = Modifier.weight(1f)) {
+                navController.navigate("linked")
+            }
         }
     }
 }
@@ -154,147 +158,10 @@ fun NavigationCard(text: String, modifier: Modifier = Modifier, onClick: () -> U
     }
 }
 
-@Composable
-fun ThreatsScreen(zDefendManager: ZDefendManager, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                text = "Threats",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        ThreatAccordion(zDefendManager)
-    }
-}
-
-@Composable
-fun ThreatAccordion(zDefendManager: ZDefendManager) {
-    val threats = zDefendManager.threats
-    val expandedState = remember { mutableStateMapOf<String, Boolean>().apply { threats.forEach { this[it.id] = false } } }
-
-    LazyColumn {
-        items(threats) { threat ->
-            ExpandableCard(
-                threat = threat,
-                expanded = expandedState[threat.id] ?: false,
-                onCardArrowClick = { expandedState[threat.id] = !(expandedState[threat.id] ?: false) }
-            )
-        }
-    }
-}
-
-@Composable
-fun ExpandableCard(
-    threat: ThreatModel,
-    expanded: Boolean,
-    onCardArrowClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        onClick = onCardArrowClick
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = threat.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = onCardArrowClick) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
-                    )
-                }
-            }
-            if (expanded) {
-                Row {
-                    Text(
-                        text = threat.severity,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .padding(end = 16.dp)
-                    )
-                    Text(
-                        text = if (threat.status) "FIXED" else "PENDING",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-                Text(
-                    text = threat.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Text(
-                    text = threat.resolution,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun AuditScreen(zDefendManager: ZDefendManager, navController: NavController) {
-    val audits = zDefendManager.auditLogs
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                text = "Audit",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn {
-            items(audits) { audit ->
-                Text(
-                    text = audit,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     TrafficLikeTheme {
-        val zDefendManager = ZDefendManager()
-        AppNavigation(zDefendManager = zDefendManager)
+        AppNavigation(zDefendManager = ZDefendManager.shared)
     }
 }
