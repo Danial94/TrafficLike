@@ -1,7 +1,6 @@
 package com.dev.trafficlike
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.zimperium.api.v5.ZDefend
@@ -13,6 +12,7 @@ import com.zimperium.api.v5.ZDeviceStatus
 import com.zimperium.api.v5.ZDeviceStatusCallback
 import com.zimperium.api.v5.ZDeviceStatusRegistration
 import com.zimperium.api.v5.ZLinkedFunctionEvent
+import com.zimperium.api.v5.ZLinkedFunctionRegistrationV2
 import com.zimperium.api.v5.ZLoginStatus
 import org.json.JSONArray
 import org.json.JSONException
@@ -37,7 +37,6 @@ data class PolicyModel(
 data class LinkedModel(
     val id: String,
     val label: String,
-    var description: String,
     var eventType: String,
     var threats: List<ThreatModel>
 )
@@ -58,6 +57,7 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
 
     private var lastDeviceStatus: ZDeviceStatus? = null
     private var deviceStatusRegistration: ZDeviceStatusRegistration? = null
+    private var registeredFunctions: ArrayList<ZLinkedFunctionRegistrationV2> = ArrayList()
 
     fun getThreats() {
         val threats = lastDeviceStatus?.allThreats
@@ -104,22 +104,51 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
 
     fun checkForUpdates() {
         ZDefend.checkForUpdates()
+        auditLogs.add("ZDefendManager - checkForUpdates()")
     }
 
-    fun registerLinkedFunction() {
+    fun registerLinkedFunction(input: String) {
+        registeredFunctions.add(ZDefend.registerLinkedFunction(input, ::onLinkedFunction, ::onMitigateFunction))
+        linkedObjects.add(LinkedModel(
+            input,
+            input,
+            "",
+            ArrayList()
+        ))
 
+        auditLogs.add("ZDefendManager - registerLinkedFunction($input)")
     }
 
     fun deregisterAllLinkedFunction() {
+        for (function in registeredFunctions) {
+            function.deregister()
+        }
 
+        registeredFunctions.clear()
+        linkedObjects.clear()
+        auditLogs.add("ZDefendManager - deregisterAllLinkedFunction()")
     }
 
-    fun onLinkedFunction(event: ZLinkedFunctionEvent) {
+    private fun onLinkedFunction(event: ZLinkedFunctionEvent) {
+        val threats = event.relatedThreats.map { threat ->
+            ThreatModel(
+                threat.uuid,
+                threat.localizedName,
+                threat.severity.toString(),
+                threat.isMitigated,
+                threat.localizedDetails,
+                threat.localizedResolution)
+        }
 
+        val linked = linkedObjects.firstOrNull { link -> link.id == event.label }
+        linked?.eventType = event.eventType.toString()
+        linked?.threats = threats
+
+        auditLogs.add("ZDefendManager - onLinkedFunction(${event.label})")
     }
 
-    fun onMitigateFunction(event: ZLinkedFunctionEvent) {
-
+    private fun onMitigateFunction(event: ZLinkedFunctionEvent) {
+        auditLogs.add("ZDefendManager - onMitigateFunction(${event.label})")
     }
 
     private fun addThreat(threat: ZDefendThreat) {
@@ -150,7 +179,6 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
 
     override fun onZLog(message: String) {
         this.troubleshootLogs.value = "onZLog(): $message"
-        Log.i("TechTitan", "onZLog(): $message")
         auditLogs.add("ZDefendManager - onZLog()")
     }
 
@@ -174,7 +202,6 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
         }
 
         this.troubleshootDetails.value = logBuilder.toString()
-        Log.i("TechTitan", "onTroubleshootDetails(): $logBuilder.toString()")
         auditLogs.add("ZDefendManager - onTroubleshootDetails()")
     }
 }
