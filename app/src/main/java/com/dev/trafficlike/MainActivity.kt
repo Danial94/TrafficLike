@@ -54,6 +54,7 @@ fun AppNavigation(zDefendManager: ZDefendManager) {
             composable("threats") { ThreatsScreen(zDefendManager, navController) }
             composable("policies") { PolicyScreen(zDefendManager, navController) }
             composable("troubleshoot") { TroubleshootScreen(zDefendManager, navController) }
+            composable("simulate") { SimulateScreen(zDefendManager, navController) }
             composable("audit") { AuditScreen(zDefendManager, navController) }
             composable("linked") { LinkedScreen(zDefendManager, navController) }
         }
@@ -124,7 +125,9 @@ fun NavigationGrid(navController: NavController) {
             NavigationCard(text = "Troubleshoot", modifier = Modifier.weight(1f)) {
                 navController.navigate("troubleshoot")
             }
-            NavigationCard(text = "Simulate", modifier = Modifier.weight(1f))
+            NavigationCard(text = "Simulate", modifier = Modifier.weight(1f)) {
+                navController.navigate("simulate")
+            }
         }
         Row(
             modifier = Modifier

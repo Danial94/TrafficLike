@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.zimperium.api.v5.ZDefend
+import com.zimperium.api.v5.ZDefendDeveloper
 import com.zimperium.api.v5.ZDefendThreat
 import com.zimperium.api.v5.ZDefendTroubleshoot
 import com.zimperium.api.v5.ZDefendTroubleshoot.TroubleshootDetailsCallback
@@ -203,5 +204,15 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
 
         this.troubleshootDetails.value = logBuilder.toString()
         auditLogs.add("ZDefendManager - onTroubleshootDetails()")
+    }
+
+    fun simulateThreats(input: Int) {
+        ZDefendDeveloper.simulateTestThreat(input, null)
+        auditLogs.add("ZDefendManager - simulateThreats($input)")
+    }
+
+    fun mitigateThreats() {
+        ZDefendDeveloper.mitigateSimulatedThreats()
+        auditLogs.add("ZDefendManager - mitigateThreats()")
     }
 }
