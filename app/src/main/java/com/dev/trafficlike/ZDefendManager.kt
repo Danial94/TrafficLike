@@ -163,13 +163,14 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
     }
 
     override fun onDeviceStatus(deviceStatus: ZDeviceStatus) {
+        isLoaded.value = true
+
         val logBuilder = StringBuilder()
         logBuilder.append("OnDeviceStatus: ").append(deviceStatus.loginStatus.name)
         logBuilder.append("\nDatetime: ").append(deviceStatus.statusDate)
 
         if (deviceStatus.loginStatus == ZLoginStatus.LOGGED_IN) {
             logBuilder.append("\nScan progress %: ").append(deviceStatus.initialScanProgressPercentage)
-            isLoaded.value = true
         } else {
             logBuilder.append("\nLast login error: ").append(deviceStatus.loginLastError.name)
         }
