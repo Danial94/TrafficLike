@@ -47,6 +47,8 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    ndkVersion = "24.0.8215888"
+    buildToolsVersion = "34.0.0"
 }
 
 dependencies {
