@@ -1,6 +1,7 @@
 package com.dev.trafficlike
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.zimperium.api.v5.ZDefend
@@ -51,6 +52,7 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
     var auditLogs = mutableStateListOf<String>()
     var linkedObjects = mutableStateListOf<LinkedModel>()
     var isLoaded = mutableStateOf(false)
+    var percentage = mutableIntStateOf(0)
 
     companion object {
         var shared = ZDefendManager()
@@ -163,14 +165,16 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
     }
 
     override fun onDeviceStatus(deviceStatus: ZDeviceStatus) {
-        isLoaded.value = true
-
         val logBuilder = StringBuilder()
         logBuilder.append("OnDeviceStatus: ").append(deviceStatus.loginStatus.name)
         logBuilder.append("\nDatetime: ").append(deviceStatus.statusDate)
 
         if (deviceStatus.loginStatus == ZLoginStatus.LOGGED_IN) {
-            logBuilder.append("\nScan progress %: ").append(deviceStatus.initialScanProgressPercentage)
+//            logBuilder.append("\nScan progress %: ").append(deviceStatus.initialScanProgressPercentage)
+            percentage.intValue = deviceStatus.initialScanProgressPercentage
+            if (deviceStatus.initialScanProgressPercentage >= 100) {
+                isLoaded.value = true
+            }
         } else {
             logBuilder.append("\nLast login error: ").append(deviceStatus.loginLastError.name)
         }

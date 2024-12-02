@@ -2,9 +2,12 @@ package com.dev.trafficlike
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -25,17 +28,22 @@ import com.dev.trafficlike.ui.theme.TrafficLikeTheme
 
 class MainActivity : ComponentActivity() {
     private val zDefendManager : ZDefendManager = ZDefendManager.shared
+
+    // Dummy database connection
     private val databaseConnectionString: String = "Server=10.10.0.27;Database=main;User Id=danial;Password=1234;"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContent {
             TrafficLikeTheme {
                 AppNavigation(zDefendManager)
             }
         }
+    }
 
+    override fun onStart() {
+        super.onStart()
         zDefendManager.initializeZDefendApi()
     }
 
@@ -64,6 +72,7 @@ fun AppNavigation(zDefendManager: ZDefendManager) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Text("Scan progress %: " + zDefendManager.percentage.intValue)
             for (audit in zDefendManager.auditLogs) {
                 Text(text = audit)
             }
@@ -100,45 +109,19 @@ fun Header(zDefendManager: ZDefendManager) {
 
 @Composable
 fun NavigationGrid(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            NavigationCard(text = "Threats", modifier = Modifier.weight(1f)) {
-                navController.navigate("threats")
-            }
-            NavigationCard(text = "Policies", modifier = Modifier.weight(1f)) {
-                navController.navigate("policies")
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            NavigationCard(text = "Troubleshoot", modifier = Modifier.weight(1f)) {
-                navController.navigate("troubleshoot")
-            }
-            NavigationCard(text = "Simulate", modifier = Modifier.weight(1f)) {
-                navController.navigate("simulate")
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            NavigationCard(text = "Audit", modifier = Modifier.weight(1f)) {
-                navController.navigate("audit")
-            }
-            NavigationCard(text = "Linked", modifier = Modifier.weight(1f)) {
-                navController.navigate("linked")
+    val navList = listOf(
+        Pair("Threats", "threats"),
+        Pair("Policies", "policies"),
+        Pair("Troubleshoot", "troubleshoot"),
+        Pair("Simulate", "simulate"),
+        Pair("Audit", "audit"),
+        Pair("Linked", "linked")
+    )
+
+    LazyColumn {
+        items(navList) { nav ->
+            NavigationCard(text = nav.first) {
+                navController.navigate(nav.second)
             }
         }
     }
@@ -148,16 +131,19 @@ fun NavigationGrid(navController: NavController) {
 fun NavigationCard(text: String, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     Card(
         shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Blue),
         modifier = modifier
-            .padding(8.dp)
-            .aspectRatio(1f),
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         onClick = onClick
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
             Text(
                 text = text,
