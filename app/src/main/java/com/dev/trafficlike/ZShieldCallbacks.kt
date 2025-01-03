@@ -1,21 +1,20 @@
 package com.dev.trafficlike
 
-import androidx.annotation.Keep
+object ZShieldCallbacks {
+    private val zDefendManager = ZDefendManager.shared
 
-class ZShieldCallbacks {
-    companion object {
-        private val zDefendManager = ZDefendManager.shared
+    @JvmStatic
+    fun IntegrityCallback() {
+        zDefendManager.auditLogs.add("ZShieldCallbacks - IntegrityCallback()")
+    }
 
-        @JvmStatic
-        @Keep
-        fun defaultCallback() {
-            zDefendManager.auditLogs.add("ZShieldCallbacks - defaultCallback()")
-        }
+    @JvmStatic
+    fun DebuggerCallback() {
+        zDefendManager.auditLogs.add("ZShieldCallbacks - DebuggerCallback()")
+    }
 
-        @JvmStatic
-        @Keep
-        fun debugCallback() {
-            zDefendManager.auditLogs.add("ZShieldCallbacks - debugCallback()")
-        }
+    @JvmStatic
+    fun RootingCallback() {
+        zDefendManager.auditLogs.add("ZShieldCallbacks - RootingCallback()")
     }
 }

@@ -83,7 +83,7 @@ fun ExpandableCard(
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        onClick = onCardArrowClick
+//        onClick = onCardArrowClick
     ) {
         Column(
             modifier = Modifier

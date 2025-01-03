@@ -170,7 +170,6 @@ class ZDefendManager : ZDeviceStatusCallback, ZLogCallback, TroubleshootDetailsC
         logBuilder.append("\nDatetime: ").append(deviceStatus.statusDate)
 
         if (deviceStatus.loginStatus == ZLoginStatus.LOGGED_IN) {
-//            logBuilder.append("\nScan progress %: ").append(deviceStatus.initialScanProgressPercentage)
             percentage.intValue = deviceStatus.initialScanProgressPercentage
             if (deviceStatus.initialScanProgressPercentage >= 100) {
                 isLoaded.value = true

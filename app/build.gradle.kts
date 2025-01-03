@@ -4,6 +4,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("/Users/danialtan/Downloads/Development/Android/keystore")
+            storePassword = "123456"
+            keyPassword = "123456"
+            keyAlias = "TrafficLikeKey"
+        }
+    }
     namespace = "com.dev.trafficlike"
     compileSdk = 34
 
@@ -27,6 +35,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            applicationIdSuffix = ".release"
+            versionNameSuffix = "-release"
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -52,7 +63,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
